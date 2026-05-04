@@ -4,19 +4,16 @@ const DOCUMENT_NAME = "Category";
 const COLLECTION_NAME = "Categories";
 
 const categorySchema = new Schema({
-    name: { type: String, require: true },
-    color: { type: String },
-    icon: { type: String },
-    type: {
+    cte_name: { type: String, require: true },
+    cte_color: { type: String },
+    cte_icon: { type: String },
+    cte_type: {
         type: String,
         require: true,
-        enum: ['income', 'expense']
+        enum: ['income', 'expense'],
     }
 }, {
-    timestamps: {
-        createdAt: 'createdOn',
-        updatedAt: 'modifiedOn'
-    },
+    timestamps: true,
     collection: COLLECTION_NAME,
 })
 

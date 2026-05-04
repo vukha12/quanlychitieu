@@ -9,10 +9,7 @@ const transactionSchema = new Schema({
     date: { type: Date, default: Date.now },
     note: { type: String },
 }, {
-    timestamps: {
-        createdAt: 'createdOn',
-        updatedAt: 'modifiedOn'
-    },
+    timestamps: true,
     collection: COLLECTION_NAME,
 })
 
