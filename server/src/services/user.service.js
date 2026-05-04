@@ -7,14 +7,22 @@ import refreshTokenModel from "../models/refreshToken.model.js";
 import { findUserByName } from "../models/repositories/user.repo.js";
 import {
     findByRefreshToken,
-    findByRefreshTokenUsed,
-    deleteTokenById
+    deleteTokenById,
+    deleteTokenByToken
 } from "../models/repositories/refreshToken.repo.js";
 import { BadRequestError, AuthFailureError, NotFoundError } from "../core/error.response.js";
 import { getDataInfo } from "../helpers/index.js";
 import { ENV } from "../configs/env.js";
 
-const handleRefreshToken = async ({ refreshToken }) => {
+const handleLogout = async (refreshToken) => {
+    if (!refreshToken) throw new NotFoundError("Token invalid!!!");
+
+    await deleteTokenByToken(refreshToken);
+
+    return true;
+}
+
+const handleRefreshToken = async (refreshToken) => {
     if (!refreshToken) throw new NotFoundError("Refresh token not found!!!");
 
     const holderToken = await findByRefreshToken(refreshToken);
@@ -142,5 +150,6 @@ const signUp = async (payload) => {
 export default {
     signUp,
     login,
-    handleRefreshToken
+    handleRefreshToken,
+    handleLogout
 }

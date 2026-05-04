@@ -1,11 +1,26 @@
 import UserService from "../services/user.service.js";
 import { CREATED, SuccessResponse } from "../core/success.response.js";
 
+const logout = async (req, res) => {
+    const { refreshToken } = req.cookies;
+
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+    })
+
+    new SuccessResponse({
+        message: "Logout successfully",
+        metadata: await UserService.handleLogout(refreshToken)
+    }).send(res);
+}
+
 const refreshToken = async (req, res) => {
 
     const { refreshToken } = req.cookies;
 
-    const result = await UserService.handleRefreshToken({ refreshToken });
+    const result = await UserService.handleRefreshToken(refreshToken);
 
     res.cookie("refreshToken", result.refreshToken, {
         httpOnly: true,
@@ -50,5 +65,6 @@ const register = async (req, res) => {
 export default {
     signIn,
     register,
-    refreshToken
+    refreshToken,
+    logout
 }
