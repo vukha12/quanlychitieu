@@ -4,14 +4,11 @@ const DOCUMENT_NAME = "Category";
 const COLLECTION_NAME = "Categories";
 
 const categorySchema = new Schema({
+    cte_user: { type: mongoose.Types.ObjectId, ref: 'User', require: true },
     cte_name: { type: String, require: true },
     cte_color: { type: String },
     cte_icon: { type: String },
-    cte_type: {
-        type: String,
-        require: true,
-        enum: ['income', 'expense'],
-    }
+    cte_parent: { type: mongoose.Types.ObjectId, ref: 'Category', default: null },
 }, {
     timestamps: true,
     collection: COLLECTION_NAME,
