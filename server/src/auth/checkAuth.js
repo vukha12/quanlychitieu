@@ -5,8 +5,6 @@ import { ENV } from "../configs/env.js";
 
 const checkAuth = (req, res, next) => {
 
-    console.log('authorization header:', req.headers.authorization)
-
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer "))

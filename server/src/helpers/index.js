@@ -1,4 +1,5 @@
-export const getDataInfo = (obj, fileds = []) => {
+
+const getDataInfo = (obj, fileds = []) => {
 
     const result = {};
 
@@ -9,3 +10,6 @@ export const getDataInfo = (obj, fileds = []) => {
     return result;
 }
 
+export {
+    getDataInfo
+}

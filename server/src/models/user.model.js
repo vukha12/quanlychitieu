@@ -4,9 +4,9 @@ const DOCUMENT_NAME = "User";
 const COLLECTION_NAME = "Users";
 
 const userSchema = new Schema({
-    usr_name_display: { type: String, require: true },
-    usr_email: { type: String, require: true },
-    usr_password: { type: String, require: true, select: false },
+    usr_name_display: { type: String, required: true },
+    usr_email: { type: String, required: true },
+    usr_password: { type: String, required: true, select: false },
     usr_avatar: { type: String, default: "" }
 }, {
     timestamps: true,
