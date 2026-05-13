@@ -16,6 +16,17 @@ const deleteCategory = async (req, res) => {
     }).send(res)
 }
 
+const updateCategory = async (req, res) => {
+    new SuccessResponse({
+        message: "Update category success",
+        metadata: await categoryService.updateCategory({
+            id: req.params.id,
+            payload: req.body,
+            userId: req.user.userId
+        })
+    }).send(res)
+}
+
 const newCategory = async (req, res) => {
     new CREATED({
         message: "Create category success!",
@@ -28,5 +39,6 @@ const newCategory = async (req, res) => {
 
 export default {
     newCategory,
-    deleteCategory
+    deleteCategory,
+    updateCategory
 }

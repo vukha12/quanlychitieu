@@ -12,6 +12,11 @@ import {
 } from "../core/error.response.js";
 import { getDataInfo } from "../helpers/index.js"
 
+const _handleNotFoundCategoryByIdAndUserId = async (id, userId, message = "") => {
+    const result = await findCategoryByIdAndUserId({ id, userId });
+    if (!result) return message;
+}
+
 const deleteCategory = async ({ id, userId, force }) => {
     return force
         ? await deleteCategoryWithChildren({ id, userId })
@@ -48,20 +53,21 @@ const deleteCategoryFirstChildren = async ({ id, userId }) => {
 }
 
 const updateCategory = async ({ id, payload, userId }) => {
+
     const { name, color, icon, parent_id } = payload
 
-    const category = await findCategoryByIdAndUserId({ id: id, userId: userId })
-    if (!category) throw new NotFoundError('Category not found')
+    _handleNotFoundCategoryByIdAndUserId(id, userId, "Category Not Found!")
 
     if (parent_id !== undefined) {
         if (parent_id === id) throw new BadRequestError('Cannot make category its own parent')
 
         if (parent_id !== null) {
             const parent = await findCategoryByIdAndUserId({ id: parent_id, userId: userId })
-            if (!existParent) throw new BadRequestError("Category parent not exist")
-        }
+            if (!parent) throw new BadRequestError("Category parent not exist")
 
-        if (parent.cte_parent?.toSitrng() === id) throw new BadRequestError("cannot loop")
+            if (parent.cte_parent?.toString() === id)
+                throw new BadRequestError("cannot loop")
+        }
 
         const hasChildren = await findParentHasChildren(id)
         if (hasChildren) throw new BadRequestError("A category that has children cannot be converted into a child category")
@@ -77,9 +83,9 @@ const updateCategory = async ({ id, payload, userId }) => {
         id,
         { $set: updateFields },
         { new: true } // trả về document sau khi update
-    ).populate('parent_id', 'name icon color')
+    ).populate('cte_parent', 'cte_name cte_icon cte_color')
 
-    return getDataInfo(update, ["_id", "name", "type", "icon", ""])
+    return getDataInfo(updated, ["_id", "name", "type", "icon", ""])
 }
 
 const createCategory = async ({ userId, payload }) => {
