@@ -59,14 +59,21 @@ const updateCategory = async ({ id, payload, userId }) => {
     _handleNotFoundCategoryByIdAndUserId(id, userId, "Category Not Found!")
 
     if (parent_id !== undefined) {
+
+        //1. không thể làm cha của mình
         if (parent_id === id) throw new BadRequestError('Cannot make category its own parent')
 
         if (parent_id !== null) {
             const parent = await findCategoryByIdAndUserId({ id: parent_id, userId: userId })
-            if (!parent) throw new BadRequestError("Category parent not exist")
+            if (!parent) throw new BadRequestError("Category parent not exist");
 
+            //2. Cha không thể làm con
             if (parent.cte_parent?.toString() === id)
-                throw new BadRequestError("cannot loop")
+                throw new BadRequestError("Cannot create circular reference")
+
+            //3. con không thể làm cha của con
+            if (parent.cte_parent !== null)
+                throw new BadRequestError("Parent category cannot be a child category")
         }
 
         const hasChildren = await findParentHasChildren(id)
@@ -83,9 +90,9 @@ const updateCategory = async ({ id, payload, userId }) => {
         id,
         { $set: updateFields },
         { new: true } // trả về document sau khi update
-    ).populate('cte_parent', 'cte_name cte_icon cte_color')
+    ).populate('cte_parent', 'cte_name cte_icon cte_color cte_parent')
 
-    return getDataInfo(updated, ["_id", "name", "type", "icon", ""])
+    return getDataInfo(updated, ["_id", "cte_name", "cte_icon", "cte_color", "cte_parent"])
 }
 
 const createCategory = async ({ userId, payload }) => {
