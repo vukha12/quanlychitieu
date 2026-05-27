@@ -5,6 +5,8 @@ import { validateObjectId } from "../../middleware/validateObjectId.js"
 
 const router = Router()
     .use(checkAuth)
+    .get('/parents', CategoryController.getAllCategoriesParent)
+    .get('/children', CategoryController.getAllCategoriesChildren)
     .post('/new', CategoryController.newCategory)
     .patch('/update/:id', validateObjectId('id'), CategoryController.updateCategory)
     .delete('/:id', validateObjectId('id'), CategoryController.deleteCategory)

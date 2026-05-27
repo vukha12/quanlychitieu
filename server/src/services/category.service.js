@@ -12,11 +12,24 @@ import {
 } from "../core/error.response.js";
 import { getDataInfo } from "../helpers/index.js"
 
+const findAllCategoriesChildren = async ({ userId }) => {
+    const result = await categoryModel.find({ cte_user: userId, cte_parent: { $ne: null } })
+        .select("_id cte_name cte_color cte_icon")
+        .lean();
+    return result;
+}
+
+const findAllCategoriesParent = async ({ userId }) => {
+    const result = await categoryModel.find({ cte_user: userId, cte_parent: null })
+        .select("_id cte_name cte_color cte_icon")
+        .lean();
+    return result;
+}
+
 const _handleNotFoundCategoryByIdAndUserId = async (id, userId, message = "") => {
     const result = await findCategoryByIdAndUserId({ id, userId });
     if (!result) return message;
 }
-
 
 const deleteCategory = async ({ id, userId, force }) => {
     return force
@@ -129,5 +142,7 @@ const createCategory = async ({ userId, payload }) => {
 export default {
     createCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    findAllCategoriesChildren,
+    findAllCategoriesParent
 }

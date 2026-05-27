@@ -1,6 +1,24 @@
 import categoryService from "../services/category.service.js";
 import { CREATED, SuccessResponse, OK } from "../core/success.response.js"
 
+const getAllCategoriesParent = async (req, res) => {
+    new SuccessResponse({
+        message: "Gel all categories parent success",
+        metadata: await categoryService.findAllCategoriesParent({
+            userId: req.user.userId
+        })
+    }).send(res)
+}
+
+const getAllCategoriesChildren = async (req, res) => {
+    new SuccessResponse({
+        message: "Gel all categories children success",
+        metadata: await categoryService.findAllCategoriesChildren({
+            userId: req.user.userId
+        })
+    }).send(res)
+}
+
 const deleteCategory = async (req, res) => {
     const force = req.query.force === 'true';
     const result = await categoryService.deleteCategory({
@@ -40,5 +58,7 @@ const newCategory = async (req, res) => {
 export default {
     newCategory,
     deleteCategory,
-    updateCategory
+    updateCategory,
+    getAllCategoriesParent,
+    getAllCategoriesChildren
 }
