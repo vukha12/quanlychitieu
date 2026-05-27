@@ -4,9 +4,9 @@ const DOCUMENT_NAME = "Transaction";
 const COLLECTION_NAME = "Transactions";
 
 const transactionSchema = new Schema({
-    trans_user: { type: mongoose.Types.ObjectId, ref: 'User', required: true },
-    trans_category: { type: mongoose.Types.ObjectId, ref: 'Category', required: true },
-    trans_amount: { type: Number, required: true },
+    trans_user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    trans_category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+    trans_amount: { type: Number, required: true, min: 0 },
     trans_date: { type: Date, default: Date.now },
     trans_note: { type: String },
     trans_type: {

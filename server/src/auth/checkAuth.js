@@ -16,6 +16,8 @@ const checkAuth = (req, res, next) => {
     try {
         const decoded = verifyToken(token, ENV.JWT_ACCESS_TOKEN_SECRET_KEY);
 
+        if (!decoded?.userId) throw new Authorization(`Invalid token payload`)
+
         req.user = decoded;
 
         return next();

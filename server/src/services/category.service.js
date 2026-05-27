@@ -17,6 +17,7 @@ const _handleNotFoundCategoryByIdAndUserId = async (id, userId, message = "") =>
     if (!result) return message;
 }
 
+
 const deleteCategory = async ({ id, userId, force }) => {
     return force
         ? await deleteCategoryWithChildren({ id, userId })
@@ -96,9 +97,8 @@ const updateCategory = async ({ id, payload, userId }) => {
 }
 
 const createCategory = async ({ userId, payload }) => {
-    console.log(`userID:::${userId}`)
-    const { name, color, icon, parent } = payload;
 
+    const { name, color, icon, parent } = payload;
 
     const existing = await findCategoryByName(name)
     if (existing) throw new BadRequestError("Category name already exists")
