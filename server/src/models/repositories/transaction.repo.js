@@ -1,5 +1,7 @@
 import transactionModel from "../transaction.model.js";
 
+const balance = async ({ }) => { }
+
 const findTransactionByIdAndUserId = async ({ id, userId }) => {
     return await transactionModel.findOne({ _id: id, trans_user: userId }).lean();
 }

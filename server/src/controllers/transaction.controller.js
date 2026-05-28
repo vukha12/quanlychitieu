@@ -1,6 +1,19 @@
 import { CREATED, OK, SuccessResponse } from "../core/success.response.js";
 import transactionService from "../services/transaction.service.js";
 
+const getBalance = async (req, res) => {
+    const { month, year } = req.query
+
+    new SuccessResponse({
+        message: "Get Balance Successfully",
+        metadata: await transactionService.handleBalance({
+            userId: req.user.userId,
+            month: month ? parseInt(month) : undefined,
+            year: year ? parseInt(year) : undefined
+        })
+    }).send(res)
+}
+
 const getTransactionById = async (req, res) => {
     new SuccessResponse({
         message: "Get Transaction Successfully",
@@ -65,5 +78,6 @@ export default {
     deleteTransaction,
     updateTransaction,
     getTransactions,
-    getTransactionById
+    getTransactionById,
+    getBalance
 }

@@ -5,6 +5,7 @@ import { validateObjectId } from "../../middleware/validateObjectId.js";
 
 const router = Router()
     .use(checkAuth)
+    .get('/balance', TransactionController.getBalance)
     .get('/list', TransactionController.getTransactions)
     .post('/create', TransactionController.createTransaction)
     .get('/:transactionId', validateObjectId('transactionId'), TransactionController.getTransactionById)

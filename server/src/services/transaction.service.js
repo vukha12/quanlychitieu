@@ -6,6 +6,43 @@ import { deleteOneTransaction, findTransactionByIdAndUserId } from "../models/re
 import { buildTransactionFilter } from "../helpers/buildTransactionFilter.js";
 import { paginate } from "../helpers/paginate.js";
 
+const handleBalance = async ({ userId, month, year }) => {
+    const filter = buildTransactionFilter({ userId, month, year })
+
+    const result = await transactionModel.aggregate([
+        { $match: filter },
+        {
+            $group: {
+                _id: null,
+
+                // Tính totalIncome
+                totalIncome: {
+                    $sum: {
+                        $cond: [{ $eq: ['$trans_type', 'income'] }, '$trans_amount', 0]
+                    }
+                },
+
+                // Tính totalExpense
+                totalExpense: {
+                    $sum: {
+                        $cond: [{ $eq: ['$trans_type', 'expense'] }, '$trans_amount', 0]
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                totalIncome: 1,
+                totalExpense: 1,
+                balance: { $subtract: ['$totalIncome', '$totalExpense'] }
+            }
+        }
+    ])
+
+    return result[0] || { totalIncome: 0, totalExpense: 0, balance: 0 }
+}
+
 const listTransaction = async ({ userId, month, year, fromDate, toDate, type, page, limit }) => {
     const filter = buildTransactionFilter({ userId, month, year, fromDate, toDate, type, page, limit })
     return paginate(transactionModel, filter, { page, limit, select: '-__v -updatedAt' })
@@ -16,7 +53,6 @@ const aTransactionById = async ({ userId, transactionId }) => {
     if (!transaction) throw new NotFoundError(`Không tìm thấy transaction`)
     return getDataInfo(transaction, ['_id', 'trans_type', 'trans_amount', 'trans_date', 'trans_note', 'trans_category']);
 }
-
 
 const updateTransactionById = async ({ userId, transactionId, payload }) => {
 
@@ -100,5 +136,6 @@ export default {
     deleteTransactionById,
     updateTransactionById,
     aTransactionById,
-    listTransaction
+    listTransaction,
+    handleBalance
 }
