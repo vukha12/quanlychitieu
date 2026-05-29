@@ -6,6 +6,70 @@ import { deleteOneTransaction, findTransactionByIdAndUserId } from "../models/re
 import { buildTransactionFilter } from "../helpers/buildTransactionFilter.js";
 import { paginate } from "../helpers/paginate.js";
 
+const handleBalanceByCategory = async ({ userId, month, year }) => {
+    const filter = buildTransactionFilter({ userId, month, year })
+
+    // query 1 - tính tổng số tiền và số lượng giao dịch theo từng category
+    const categoryTotals = await transactionModel.aggregate([
+        { $match: filter },
+        {
+            $group: {
+                _id: {
+                    categoryId: '$trans_category',
+                    categoryName: '$trans_categorySnapshot.name',
+                    categoryParentId: '$trans_categorySnapshot.parentId'
+                },
+                total: { $sum: '$trans_amount' },
+                count: { $sum: 1 }
+            }
+        }
+    ])
+
+    console.table(categoryTotals);
+
+    // query 2 xử  lý trong JS, gom con vào cha
+    const parentMap = {}
+
+    categoryTotals.forEach(({ _id, total, count }) => {
+        const { categoryId, categoryName, categoryParentId } = _id;
+
+        if (!categoryParentId) {
+            // Nếu là category cha, lưu vào parentMap
+            if (!parentMap[categoryId]) {
+                parentMap[categoryId] = {
+                    categoryId,
+                    categoryName,
+                    total: 0,
+                    count: 0,
+                    subCategories: []
+                }
+            }
+            parentMap[categoryId].total += total
+            parentMap[categoryId].count += count
+        } else {
+            // Là category con -> gộp vào cha
+            if (!parentMap[categoryParentId]) {
+                parentMap[categoryParentId] = {
+                    categoryId: categoryParentId,
+                    total: 0,
+                    count: 0,
+                    subCategories: []
+                }
+            }
+            parentMap[categoryParentId].total += total
+            parentMap[categoryParentId].count += count
+            parentMap[categoryParentId].subCategories.push({
+                categoryId,
+                categoryName,
+                total,
+                count
+            })
+        }
+    })
+
+    return Object.values(parentMap).sort((a, b) => b.categoryName - a.categoryName) // sắp xếp theo tên 
+}
+
 const handleBalance = async ({ userId, month, year }) => {
     const filter = buildTransactionFilter({ userId, month, year })
 
@@ -114,9 +178,15 @@ const newTransaction = async ({ userId, payload }) => {
     if (!['income', 'expense'].includes(type)) throw new BadRequestError(`Không rõ thu hay chi.`)
 
     // validate category
+    let categorySnapshot = null;
     if (category) {
         const categoryExist = await findCategoryByIdAndUserId({ id: category, userId })
         if (!categoryExist) throw new NotFoundError(`Không tìm thấy category`)
+        categorySnapshot = {
+            name: categoryExist.cte_name,
+            icon: categoryExist.cte_icon,
+            parentId: categoryExist.cte_parent || null
+        }
     }
 
     const createTransaction = await transactionModel.create({
@@ -125,7 +195,8 @@ const newTransaction = async ({ userId, payload }) => {
         trans_amount: amount,
         trans_date: date || new Date(),
         trans_note: note,
-        trans_category: category
+        trans_category: category,
+        trans_categorySnapshot: categorySnapshot
     })
 
     return getDataInfo(createTransaction, ['_id', 'trans_type', 'trans_amount', 'trans_date', 'trans_note', 'trans_category']);
@@ -137,5 +208,6 @@ export default {
     updateTransactionById,
     aTransactionById,
     listTransaction,
-    handleBalance
+    handleBalance,
+    handleBalanceByCategory
 }

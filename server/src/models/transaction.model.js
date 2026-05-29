@@ -6,6 +6,7 @@ const COLLECTION_NAME = "Transactions";
 const transactionSchema = new Schema({
     trans_user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     trans_category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+    trans_categorySnapshot: { name: String, icon: String, parentId: String },
     trans_amount: {
         type: Number,
         required: true,

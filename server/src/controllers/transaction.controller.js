@@ -1,6 +1,19 @@
 import { CREATED, OK, SuccessResponse } from "../core/success.response.js";
 import transactionService from "../services/transaction.service.js";
 
+const getBalanceByCategory = async (req, res) => {
+    const { month, year } = req.query
+
+    new SuccessResponse({
+        message: "Get Balance By Category Successfully",
+        metadata: await transactionService.handleBalanceByCategory({
+            userId: req.user.userId,
+            month: month ? parseInt(month) : undefined,
+            year: year ? parseInt(year) : undefined
+        })
+    }).send(res)
+}
+
 const getBalance = async (req, res) => {
     const { month, year } = req.query
 
@@ -79,5 +92,6 @@ export default {
     updateTransaction,
     getTransactions,
     getTransactionById,
-    getBalance
+    getBalance,
+    getBalanceByCategory
 }
